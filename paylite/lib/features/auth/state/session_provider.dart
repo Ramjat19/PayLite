@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:paylite/core/security/secure_session_store.dart';
+import 'package:paylite/core/security/app_lock.dart';
 
 final sessionProvider = NotifierProvider<SessionNotifier, bool>(
   SessionNotifier.new,
@@ -16,13 +17,17 @@ class SessionNotifier extends Notifier<bool> {
 
   Future<void> _restore() async {
     final token = await _store.getAccessToken();
-    if (token != null) state = true;
+    if (token != null){ 
+      state = true;
+      ref.read(appLockProvider.notifier).lock(); //biometric gate
+    }
   }
 
   void signIn() => state = true;
 
   Future<void> signOut() async {
     await _store.clearAccessToken();
+    ref.read(appLockProvider.notifier).unlock();
     state = false;
   }
 }   

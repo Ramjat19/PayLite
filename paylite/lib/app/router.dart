@@ -24,9 +24,9 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: Routes.login, name: 'login',
-        builder: (_, __) => const LoginScreen()),
+        builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.home, name: 'home',
-        builder: (_, __) => const HomeScreen()),
+        builder: (_, _) => const HomeScreen()),
       // GoRoute(path: Routes.scan, name: 'scan',
       //   builder: (_, __) => const ScanScreen()),
       // GoRoute(path: Routes.pay, name: 'pay',
