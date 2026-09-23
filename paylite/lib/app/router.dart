@@ -4,6 +4,11 @@ import 'package:paylite/app/routes.dart';
 import 'package:paylite/features/auth/state/session_provider.dart';
 import 'package:paylite/features/auth/presentation/login_screen.dart';
 import 'package:paylite/features/presentation/home_screen.dart';
+import 'package:paylite/features/scan/presentation/scan_screen.dart';
+import 'package:paylite/features/scan/presentation/pay_screen.dart';
+import 'package:paylite/features/scan/presentation/review_screen.dart';
+import 'package:paylite/features/scan/presentation/pin_screen.dart';
+import 'package:paylite/features/scan/presentation/status_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final session = ref.watch(sessionProvider);
@@ -27,18 +32,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.home, name: 'home',
         builder: (_, _) => const HomeScreen()),
-      // GoRoute(path: Routes.scan, name: 'scan',
-      //   builder: (_, __) => const ScanScreen()),
-      // GoRoute(path: Routes.pay, name: 'pay',
-      //   builder: (_, __) => const PayScreen()),
-      // GoRoute(path: Routes.payReview, name: 'payReview',
-      //   builder: (_, __) => const ReviewScreen()),
-      // GoRoute(path: Routes.payPin, name: 'payPin',
-      //   builder: (_, __) => const PinScreen()),
-      // GoRoute(
-      //   path: '${Routes.payStatus}/:id', name: 'payStatus',
-      //   builder: (_, state) => StatusScreen(id: state.pathParameters['id']!),
-      // ),
+      GoRoute(path: Routes.scan, name: 'scan',
+        builder: (_, _) => const ScanScreen()),
+      GoRoute(path: Routes.pay, name: 'pay',
+        builder: (_, _) => const PayScreen()),
+      GoRoute(path: Routes.payReview, name: 'payReview',
+        builder: (_, _) => const ReviewScreen()),
+      GoRoute(path: Routes.payPin, name: 'payPin',
+        builder: (_, _) => const PinScreen()),
+      GoRoute(
+        path: '${Routes.payStatus}/:id', name: 'payStatus',
+        builder: (_, state) => StatusScreen(id: state.pathParameters['id']!),
+      ),
       // GoRoute(path: Routes.requests, name: 'requests',
       //   builder: (_, __) => const RequestsScreen()),
       // GoRoute(path: Routes.split, name: 'split',

@@ -1,5 +1,5 @@
-const { randomUUID } = require('node:crypto');
-const { normaliseVpa, store } = require('../data/store');
+const { randomUUID, timingSafeEqual } = require('node:crypto');
+const { hashLoginPin, normaliseVpa, store } = require('../data/store');
 const { ApiError } = require('../middleware/api-error');
 const {
   optionalString,
@@ -78,7 +78,16 @@ function createPayment({ session, idempotencyKey, payload, mockHeaders = {} }) {
   const vpaAddress = normaliseVpa(requireString(body.vpa, 'vpa'));
   const amountPaise = requirePositivePaise(body.amountPaise, 'amountPaise');
   const note = optionalString(body.note, 'note', 140);
-  requireString(body.upiPinHash, 'upiPinHash');
+  const upiPinHash = requireString(body.upiPinHash, 'upiPinHash');
+  const customer = store.customers.get(session.customerId);
+  const expectedPinHash = customer?.paymentPinHash;
+  const suppliedPin = Buffer.from(upiPinHash, 'hex');
+  const expectedPin = Buffer.from(expectedPinHash || '', 'hex');
+
+  if (!expectedPinHash || suppliedPin.length !== expectedPin.length ||
+      !timingSafeEqual(suppliedPin, expectedPin)) {
+    throw new ApiError(401, 'INVALID_UPI_PIN', 'The payment PIN is incorrect.');
+  }
 
   if (amountPaise > maximumPaymentPaise) {
     throw new ApiError(

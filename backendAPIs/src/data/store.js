@@ -43,6 +43,7 @@ const store = {
       {
         id: 'CUST1001',
         loginPinHash: hashLoginPin('1234'),
+        paymentPinHash: hashLoginPin('1234'),
         accountId: 'account-primary',
         boundDeviceId: null,
       },
