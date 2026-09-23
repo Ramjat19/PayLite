@@ -5,6 +5,7 @@ import 'package:paylite/core/utils/money.dart';
 import 'package:paylite/core/errors/bank_error.dart';
 import 'package:paylite/features/payments/state/payment_status_provider.dart';
 import 'package:paylite/features/payments/domain/models/payment.dart';
+import 'package:paylite/features/home/state/account_provider.dart';
 
 class StatusScreen extends ConsumerWidget {
   final String id;
@@ -13,11 +14,19 @@ class StatusScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statusState = ref.watch(paymentStatusProvider(id));
+    void finish() {
+      ref.invalidate(accountProvider);
+      ref.invalidate(recentPaymentsProvider);
+      context.go('/home');
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Status')),
       body: statusState.when(
-        data: (payment) => _PaymentStatusBody(payment: payment),
+        data: (payment) => _PaymentStatusBody(
+          payment: payment,
+          onDone: finish,
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: Column(
@@ -28,7 +37,7 @@ class StatusScreen extends ConsumerWidget {
               Text(e is BankError ? e.message : 'Unable to retrieve payment status.'),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: () => context.go('/home'),
+                onPressed: finish,
                 child: const Text('Go Home'),
               ),
             ],
@@ -41,8 +50,9 @@ class StatusScreen extends ConsumerWidget {
 
 class _PaymentStatusBody extends StatelessWidget {
   final Payment payment;
+  final VoidCallback onDone;
 
-  const _PaymentStatusBody({required this.payment});
+  const _PaymentStatusBody({required this.payment, required this.onDone});
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +82,7 @@ class _PaymentStatusBody extends StatelessWidget {
           Text(formatMoney(payment.amountPaise), style: const TextStyle(fontSize: 28)),
           const SizedBox(height: 32),
           FilledButton(
-            onPressed: () => context.go('/home'),
+            onPressed: onDone,
             child: const Text('Done'),
           ),
         ],

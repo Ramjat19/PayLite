@@ -72,6 +72,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const Text('Recent payments',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => context.go('/history'),
+                icon: const Icon(Icons.history),
+                label: const Text('View all'),
+              ),
+            ),
             paymentsState.when(
               data: (payments) => payments.isEmpty
                   ? const Text('No recent payments',
@@ -212,7 +220,7 @@ class _PaymentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCredit = payment.amountPaise > 0;
+    final isCredit = payment.direction == PaymentDirection.received;
     return ListTile(
       dense: true,
       leading: CircleAvatar(
@@ -222,7 +230,7 @@ class _PaymentTile extends StatelessWidget {
       ),
       title: Text(payment.counterparty.verifiedName),
       trailing: Text(
-        isCredit ? '+${formatMoney(payment.amountPaise)}' : '-${formatMoney(-payment.amountPaise)}',
+        isCredit ? '+${formatMoney(payment.amountPaise)}' : '-${formatMoney(payment.amountPaise)}',
         style: TextStyle(
           color: isCredit ? Colors.green.shade700 : Colors.red.shade700,
           fontWeight: FontWeight.w600,

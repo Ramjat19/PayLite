@@ -43,4 +43,37 @@ class PaymentRepository {
       throw e.error as BankError;
     }
   }
+
+  Future<PaymentPage> getHistory({
+    String? cursor,
+    String? filter,
+    String? query,
+  }) async {
+    try {
+      final res = await _dio.get('/payments', queryParameters: {
+        if (cursor != null) 'cursor': cursor,
+        if (filter != null && filter != 'all') 'filter': filter,
+        if (query != null && query.trim().isNotEmpty) 'q': query.trim(),
+      });
+      final data = (res.data as Map).cast<String, Object?>();
+      final items = (data['items'] as List<Object?>)
+          .map((item) => Payment.fromJson(
+                (item as Map).cast<String, Object?>(),
+              ))
+          .toList();
+      return PaymentPage(
+        items: items,
+        nextCursor: data['nextCursor'] as String?,
+      );
+    } on DioException catch (e) {
+      throw e.error as BankError;
+    }
+  }
 }   
+
+class PaymentPage {
+  const PaymentPage({required this.items, required this.nextCursor});
+
+  final List<Payment> items;
+  final String? nextCursor;
+}
