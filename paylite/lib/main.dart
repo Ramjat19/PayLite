@@ -1,30 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:paylite/core/network/api_client.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'app/app.dart';
+import 'core/network/api_client.dart';
 
 void main() {
   ApiClient().init();
-  runApp(const PayLiteApp());
-}
-
-
-class PayLiteApp extends StatelessWidget {
-  const PayLiteApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'PayLite',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('Welcome to PayLite!'),
-        ),
-      ),
-    );
-  }
+  runApp(const ProviderScope(child: PayLiteApp()));
 }
 // class MyApp extends StatelessWidget {
 //   const MyApp({super.key});
