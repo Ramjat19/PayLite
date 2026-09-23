@@ -11,6 +11,7 @@ import 'package:paylite/features/scan/presentation/pin_screen.dart';
 import 'package:paylite/features/scan/presentation/status_screen.dart';
 import 'package:paylite/features/presentation/history_screen.dart';
 import 'package:paylite/features/collect/presentation/requests_screen.dart';
+import 'package:paylite/features/split/presentation/split_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final session = ref.watch(sessionProvider);
@@ -50,6 +51,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const HistoryScreen()),
       GoRoute(path: Routes.requests, name: 'requests',
         builder: (_, _) => const RequestsScreen()),
+      GoRoute(path: Routes.split, name: 'split',
+        builder: (_, _) => const SplitScreen()),
       // GoRoute(path: Routes.requests, name: 'requests',
       //   builder: (_, __) => const RequestsScreen()),
       // GoRoute(path: Routes.split, name: 'split',

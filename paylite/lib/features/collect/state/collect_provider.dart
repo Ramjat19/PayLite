@@ -32,6 +32,18 @@ class CollectRequestsNotifier extends AsyncNotifier<List<CollectRequest>> {
     await refresh();
   }
 
+  Future<void> createSplitRequests({
+    required List<({String vpa, int amountPaise})> participants,
+  }) async {
+    for (final participant in participants) {
+      await ref.read(collectRepositoryProvider).create(
+            vpa: participant.vpa,
+            amountPaise: participant.amountPaise,
+          );
+    }
+    await refresh();
+  }
+
   Future<void> decline(CollectRequest request) async {
     await ref.read(collectRepositoryProvider).decline(request.id);
     ref.invalidateSelf();
