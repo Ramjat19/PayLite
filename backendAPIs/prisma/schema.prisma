@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentDirection {
+  SENT
+  RECEIVED
+}
+
+enum PaymentStatus {
+  SUCCESS
+  PENDING
+  FAILED
+}
+
+enum CollectRequestStatus {
+  PENDING
+  PAID
+  DECLINED
+  EXPIRED
+}
+
+model Customer {
+  id             String    @id
+  loginPinHash   String
+  paymentPinHash String
+  boundDeviceId  String?   @unique
+  account        Account?
+  sessions       Session[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Account {
+  id                String            @id
+  customerId        String            @unique
+  maskedNumber      String
+  balancePaise      Int
+  primaryVpaAddress String
+  customer          Customer          @relation(fields: [customerId], references: [id])
+  vpas              Vpa[]
+  payments          Payment[]
+  sessions          Session[]
+  outgoingRequests  CollectRequest[]  @relation("requestFrom")
+  incomingRequests  CollectRequest[]  @relation("requestTo")
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model Vpa {
+  address           String   @id
+  normalizedAddress String   @unique
+  verifiedName      String
+  bankName          String
+  accountId         String
+  account           Account  @relation(fields: [accountId], references: [id])
+}
+
+model Session {
+  tokenHash  String   @id
+  customerId String
+  accountId  String
+  deviceId   String
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id])
+  account    Account  @relation(fields: [accountId], references: [id])
+
+  @@index([customerId, deviceId])
+  @@index([expiresAt])
+}
+
+model Payment {
+  id                       String        @id
+  accountId                String
+  direction                PaymentDirection
+  counterpartyAddress      String
+  counterpartyName         String
+  counterpartyBank         String
+  amountPaise              Int
+  note                     String?
+  status                   PaymentStatus
+  upiRef                   String?       @unique
+  createdAt                DateTime      @default(now())
+  pendingUntil             DateTime?
+  account                  Account       @relation(fields: [accountId], references: [id])
+  paidCollectRequests      CollectRequest[] @relation("paidPayment")
+
+  @@index([accountId, createdAt, id])
+  @@index([accountId, status])
+}
+
+model CollectRequest {
+  id             String               @id
+  fromAccountId  String
+  toAccountId    String
+  amountPaise    Int
+  status         CollectRequestStatus
+  expiresAt      DateTime
+  paidPaymentId  String?
+  fromAccount    Account              @relation("requestFrom", fields: [fromAccountId], references: [id])
+  toAccount      Account              @relation("requestTo", fields: [toAccountId], references: [id])
+  paidPayment    Payment?             @relation("paidPayment", fields: [paidPaymentId], references: [id])
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([fromAccountId, status])
+  @@index([toAccountId, status])
+  @@index([status, expiresAt])
+}
+
+model IdempotencyRecord {
+  accountId        String
+  key              String
+  operation        String
+  requestFingerprint String
+  paymentId        String?
+  createdAt        DateTime @default(now())
+
+  @@id([accountId, key, operation])
+  @@index([createdAt])
+}
