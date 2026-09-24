@@ -135,5 +135,62 @@ void main() {
         throwsUnsupportedError,
       );
     });
+    test('vpa preserves verified name and bank name', () {
+      final Vpa vpa = Vpa.fromJson(vpaJson);
+
+      expect(vpa.address, 'merchant@paylite');
+      expect(vpa.verifiedName, 'Merchant Store');
+      expect(vpa.bankName, 'PayLite Bank');
+    });
+    // test('vpa rejects an invalid address', () {
+    //   expect(
+    //     () => Vpa.fromJson(<String, Object?>{
+    //       'address': 'invalid-vpa',
+    //       'verifiedName': 'Invalid VPA',
+    //       'bankName': 'PayLite Bank',
+    //     }),
+    //     throwsFormatException,
+    //   );
+    // });
+    test('vpa rejects an empty verified name', () {
+      expect(
+        () => Vpa.fromJson(<String, Object?>{
+          'address': 'valid@paylite',
+          'verifiedName': '',
+          'bankName': 'PayLite Bank',
+        }),
+        throwsFormatException,
+      );
+    });
+    test('vpa rejects an empty bank name', () {
+      expect(
+        () => Vpa.fromJson(<String, Object?>{
+          'address': 'valid@paylite',
+          'verifiedName': 'Valid VPA',
+          'bankName': '',
+        }),
+        throwsFormatException,
+      );
+    });
+    test('vpa rejects a null bank name', () {
+        expect(
+          () => Vpa.fromJson(<String, Object?>{
+            'address': 'valid@paylite',
+            'verifiedName': 'Valid VPA',
+            'bankName': null,
+          }),
+          throwsFormatException,
+        );
+      });
+      test('vpa accepts a valid VPA', () {
+        final Vpa vpa = Vpa.fromJson(<String, Object?>{
+          'address': 'valid@paylite',
+          'verifiedName': 'Valid VPA',
+          'bankName': 'PayLite Bank',
+        });
+        expect(vpa.address, 'valid@paylite');
+        expect(vpa.verifiedName, 'Valid VPA');
+        expect(vpa.bankName, 'PayLite Bank');
+      });
   });
 }

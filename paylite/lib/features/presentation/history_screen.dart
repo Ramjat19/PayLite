@@ -108,7 +108,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       )
                     : ListView.builder(
                         controller: _scrollController,
+                      itemExtent: 72,
                         padding: const EdgeInsets.only(bottom: 24),
+                      addAutomaticKeepAlives: false,
                         itemCount: payments.length + (notifier.isLoadingMore ? 1 : 0),
                         itemBuilder: (context, index) {
                           if (index == payments.length) {
@@ -117,7 +119,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               child: Center(child: CircularProgressIndicator()),
                             );
                           }
-                          return _HistoryTile(payment: payments[index]);
+                          return RepaintBoundary(
+                            key: ValueKey(payments[index].id),
+                            child: _HistoryTile(payment: payments[index]),
+                          );
                         },
                       ),
               ),
