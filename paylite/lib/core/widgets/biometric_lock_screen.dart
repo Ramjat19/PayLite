@@ -69,7 +69,7 @@ class _BiometricLockScreenState extends ConsumerState<BiometricLockScreen> {
               ),
               const SizedBox(height: 32),
               FilledButton(
-                onPressed: _checking ? null : _unlock,
+                onPressed: _unlock,
                 child: _checking
                     ? const SizedBox(
                         height: 20, width: 20,
