@@ -224,7 +224,11 @@ class _ParticipantRow extends StatelessWidget {
             ),
           ),
           if (onRemove != null)
-            IconButton(onPressed: onRemove, icon: const Icon(Icons.close)),
+            IconButton(
+              tooltip: 'Remove participant',
+              onPressed: onRemove,
+              icon: const Icon(Icons.close),
+            ),
         ],
       ),
     );

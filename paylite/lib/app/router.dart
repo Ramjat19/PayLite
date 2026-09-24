@@ -12,6 +12,9 @@ import 'package:paylite/features/scan/presentation/status_screen.dart';
 import 'package:paylite/features/presentation/history_screen.dart';
 import 'package:paylite/features/collect/presentation/requests_screen.dart';
 import 'package:paylite/features/split/presentation/split_screen.dart';
+import 'package:paylite/features/payments/presentation/receipt_screen.dart';
+import 'package:paylite/features/payments/domain/models/payment.dart';
+import 'package:paylite/features/notifications/presentation/notifications_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final session = ref.watch(sessionProvider);
@@ -35,6 +38,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.home, name: 'home',
         builder: (_, _) => const HomeScreen()),
+      GoRoute(path: Routes.notifications, name: 'notifications',
+        builder: (_, _) => const NotificationsScreen()),
       GoRoute(path: Routes.scan, name: 'scan',
         builder: (_, _) => const ScanScreen()),
       GoRoute(path: Routes.pay, name: 'pay',
@@ -46,6 +51,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '${Routes.payStatus}/:id', name: 'payStatus',
         builder: (_, state) => StatusScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: Routes.payReceipt,
+        name: 'payReceipt',
+        builder: (_, state) => ReceiptScreen(payment: state.extra! as Payment),
       ),
       GoRoute(path: Routes.history, name: 'history',
         builder: (_, _) => const HistoryScreen()),

@@ -68,6 +68,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   labelText: 'PIN',
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
+                    tooltip: _obscure ? 'Show PIN' : 'Hide PIN',
                     icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
                     onPressed: () => setState(() => _obscure = !_obscure),
                   ),

@@ -11,6 +11,8 @@ class PayScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final parsed = ref.watch(parsedQrProvider);
+    if (parsed == null) return const _ManualPayForm();
+
     final vpaState = ref.watch(vpaLookupProvider);
 
     return Scaffold(
@@ -18,7 +20,7 @@ class PayScreen extends ConsumerWidget {
       body: vpaState.when(
         data: (vpa) {
           // VPA verified → show pay form
-          return _PayForm(parsed: parsed!, vpa: vpa);
+          return _PayForm(parsed: parsed, vpa: vpa);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) {
@@ -42,6 +44,91 @@ class PayScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _ManualPayForm extends StatefulWidget {
+  const _ManualPayForm();
+
+  @override
+  State<_ManualPayForm> createState() => _ManualPayFormState();
+}
+
+class _ManualPayFormState extends State<_ManualPayForm> {
+  final _vpaController = TextEditingController();
+  final _amountController = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _vpaController.dispose();
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  void _continue() {
+    final vpa = _vpaController.text.trim().toLowerCase();
+    final amount = double.tryParse(_amountController.text.trim());
+    if (!vpa.contains('@') || amount == null || amount <= 0) {
+      setState(() => _error = 'Enter a valid UPI ID and amount.');
+      return;
+    }
+    context.goNamed('payReview', extra: {
+      'vpa': vpa,
+      'name': vpa,
+      'amountPaise': (amount * 100).round(),
+      'note': '',
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Pay')),
+      body: ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          const Text('Pay with UPI ID', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          const Text('Scan a QR code to fill this automatically, or enter the details manually.'),
+          const SizedBox(height: 24),
+          TextField(
+            controller: _vpaController,
+            decoration: const InputDecoration(
+              labelText: 'Recipient UPI ID',
+              hintText: 'merchant@paylite',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _amountController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              labelText: 'Amount',
+              prefixText: '₹ ',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          if (_error != null) ...[
+            const SizedBox(height: 12),
+            Text(_error!, style: const TextStyle(color: Colors.red)),
+          ],
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: _continue,
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Continue'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => context.go('/scan'),
+            icon: const Icon(Icons.qr_code_scanner),
+            label: const Text('Scan QR instead'),
+          ),
+        ],
       ),
     );
   }

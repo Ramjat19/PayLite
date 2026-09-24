@@ -1,32 +1,55 @@
 # paylite
+# PayLite
 
-A new Flutter project.
+PayLite is a Flutter UPI-style payment app backed by an in-memory Node/Express mock API. It supports login, secure session restoration, biometric app locking, QR/VPA payments, payment status polling, receipts, collect requests, bill splitting, cursor-paged history, and notification deep links.
 
-## Getting Started
+## Quick Start
 
-This project is a starting point for a Flutter application.
+Start the API:
 
-A few resources to get you started if this is your first Flutter project:
+```powershell
+cd ..\backendAPIs
+npm install
+npm start
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Start Flutter in another terminal:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```powershell
+flutter pub get
+flutter run -d chrome
+```
 
+Demo credentials:
 
+```text
+Customer ID: CUST1001
+Login PIN:    1234
+Payment PIN:  1234
+```
 
+## Documentation
 
+See [docs/END_TO_END_GUIDE.md](docs/END_TO_END_GUIDE.md) for:
 
+- Architecture and folder responsibilities
+- Flutter and backend data flow
+- Models and API contracts
+- Session restoration and biometric locking
+- QR/VPA payment flow and idempotency
+- SUCCESS/PENDING/FAILED polling
+- Receipts, collect requests, splitting, and history
+- Notifications and deep links
+- Loading/error/empty states
+- Accessibility, reduced motion, testing, and known limitations
 
+The backend API documentation is in [../backendAPIs/README.md](../backendAPIs/README.md).
 
+## Validation
 
+```powershell
+flutter analyze
+flutter test
+```
 
-to-do:
-
-1. secure session restoration basically when the user login once token stores so first check for the token if yes then app lock + biometric, if not then login again
-
-
-
+The backend uses an in-memory store, so restarting it resets demo sessions, payments, and collect requests.

@@ -14,6 +14,7 @@ class StatusScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statusState = ref.watch(paymentStatusProvider(id));
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
     void finish() {
       ref.invalidate(accountProvider);
       ref.invalidate(recentPaymentsProvider);
@@ -23,9 +24,16 @@ class StatusScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Status')),
       body: statusState.when(
-        data: (payment) => _PaymentStatusBody(
-          payment: payment,
-          onDone: finish,
+        data: (payment) => AnimatedSwitcher(
+          duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 350),
+          child: _PaymentStatusBody(
+            key: ValueKey(payment.status),
+            payment: payment,
+            onDone: finish,
+            onReceipt: payment.status == PaymentStatus.success
+                ? () => context.goNamed('payReceipt', extra: payment)
+                : null,
+          ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -51,8 +59,14 @@ class StatusScreen extends ConsumerWidget {
 class _PaymentStatusBody extends StatelessWidget {
   final Payment payment;
   final VoidCallback onDone;
+  final VoidCallback? onReceipt;
 
-  const _PaymentStatusBody({required this.payment, required this.onDone});
+  const _PaymentStatusBody({
+    super.key,
+    required this.payment,
+    required this.onDone,
+    this.onReceipt,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +96,11 @@ class _PaymentStatusBody extends StatelessWidget {
           Text(formatMoney(payment.amountPaise), style: const TextStyle(fontSize: 28)),
           const SizedBox(height: 32),
           FilledButton(
-            onPressed: onDone,
-            child: const Text('Done'),
+            onPressed: onReceipt ?? onDone,
+            child: Text(onReceipt == null ? 'Done' : 'View receipt'),
           ),
+          if (onReceipt != null)
+            TextButton(onPressed: onDone, child: const Text('Done')),
         ],
       ),
     );

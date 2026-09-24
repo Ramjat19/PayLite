@@ -17,29 +17,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _hideBalance = true;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.invalidate(accountProvider);
+      ref.invalidate(recentPaymentsProvider);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final accountState = ref.watch(accountProvider);
     final paymentsState = ref.watch(recentPaymentsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('PayLite')),
+      appBar: AppBar(
+        title: const Text('PayLite'),
+        actions: [
+          IconButton(
+            tooltip: 'Notifications',
+            onPressed: () => context.go('/notifications'),
+            icon: const Icon(Icons.notifications_none),
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
-          ref.read(accountProvider.notifier).refresh();
+          await ref.read(accountProvider.notifier).refresh();
           ref.invalidate(recentPaymentsProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Balance card
-            accountState.when(
-              data: (account) => _BalanceCard(
-                account: account,
-                hidden: _hideBalance,
-                onToggle: () => setState(() => _hideBalance = !_hideBalance),
+            AnimatedSwitcher(
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 280),
+              child: accountState.when(
+                data: (account) => _BalanceCard(
+                  key: const ValueKey('balance-data'),
+                  account: account,
+                  hidden: _hideBalance,
+                  onToggle: () => setState(() => _hideBalance = !_hideBalance),
+                ),
+                loading: () => const _BalanceSkeleton(key: ValueKey('balance-loading')),
+                error: (e, _) => _RetryMessage(
+                  key: const ValueKey('balance-error'),
+                  message: 'Couldn\'t load your account.',
+                  onRetry: () => ref.invalidate(accountProvider),
+                ),
               ),
-              loading: () => const _BalanceSkeleton(),
-              error: (e, _) => Text('$e'),
             ),
             const SizedBox(height: 24),
 
@@ -93,7 +122,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   height: 40,
                   child:
                       Center(child: CircularProgressIndicator(strokeWidth: 2))),
-              error: (e, _) => Text('$e', style: const TextStyle(color: Colors.red)),
+              error: (e, _) => _RetryMessage(
+                message: 'Couldn\'t load recent payments.',
+                onRetry: () => ref.invalidate(recentPaymentsProvider),
+              ),
             ),
           ],
         ),
@@ -108,6 +140,7 @@ class _BalanceCard extends StatelessWidget {
   final VoidCallback onToggle;
 
   const _BalanceCard({
+    super.key,
     required this.account,
     required this.hidden,
     required this.onToggle,
@@ -138,6 +171,7 @@ class _BalanceCard extends StatelessWidget {
             ],
           ),
           IconButton(
+            tooltip: hidden ? 'Show balance' : 'Hide balance',
             icon: Icon(hidden ? Icons.visibility : Icons.visibility_off,
                 color: Colors.white70),
             onPressed: onToggle,
@@ -148,8 +182,25 @@ class _BalanceCard extends StatelessWidget {
   }
 }
 
+class _RetryMessage extends StatelessWidget {
+  const _RetryMessage({super.key, required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(message),
+        TextButton(onPressed: onRetry, child: const Text('Retry')),
+      ],
+    );
+  }
+}
+
 class _BalanceSkeleton extends StatelessWidget {
-  const _BalanceSkeleton();
+  const _BalanceSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
